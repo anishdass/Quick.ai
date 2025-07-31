@@ -14,7 +14,10 @@ const Navbar = () => {
         onClick={() => navigate("/")}
       />
 
-      <button className=' flex items-center gap-2 rounded-full text-sm cursor-pointer bg-primary text-white px-10 py-2.5'>
+      {/* <button className=' flex items-center gap-2 rounded-full text-sm cursor-pointer bg-primary text-white px-10 py-2.5'> */}
+      <button
+        className=' flex items-center gap-2 rounded-full text-sm cursor-pointer text-white px-10 py-2.5'
+        style={{ backgroundColor: "#5044e5 " }}>
         Get started <ArrowRight className=' w-4 h-4' />
       </button>
     </div>
