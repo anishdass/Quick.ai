@@ -1,0 +1,28 @@
+# .github/workflows/ci.yml
+name: CI for React App
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout your code
+      - uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # Step 3: Install dependencies
+      - run: npm install
+
+      # Step 4: Run tests (if you have them)
+      - run: npm test
+
+      # Step 5: Build your app
+      - run: npm run build
