@@ -38,6 +38,8 @@ const WriteArticle = () => {
         />
 
         <p className=' mt-4 text-sm font-medium'>Article Length</p>
+
+        {/* Length Choice */}
         <div className=' mt-3 flex gap-3 flex-wrap sm:max-w-9/11'>
           {articleLength.map((item, index) => (
             <span
@@ -52,12 +54,16 @@ const WriteArticle = () => {
             </span>
           ))}
         </div>
+
         <br />
+
+        {/* Button */}
         <button className=' w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#226bff] to-[#65adff] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer'>
           <Edit className=' w-5' />
           Generate Article
         </button>
       </form>
+
       {/* right col */}
       <div className=' w-full max-w-lg p-4 bg-white rounded-lg flex flex-col border border-gray-200 min-h-96 max-h-[600px]'>
         <div className=' flex items-center gap-3'>
