@@ -35,6 +35,7 @@ const WriteArticle = () => {
           onClick={(e) => setInput(e.target.value)}
           placeholder='The future of AI is...'
           required
+          value={input}
         />
 
         <p className=' mt-4 text-sm font-medium'>Article Length</p>

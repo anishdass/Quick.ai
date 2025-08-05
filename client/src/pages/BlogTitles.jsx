@@ -27,7 +27,7 @@ const BlogTitles = () => {
         className=' w-full max-w-lg p-4 bg-white rounded-lg border border-gray-200'>
         {/* Heading */}
         <div className=' flex items-center gap-3'>
-          <Sparkles className=' w-6 text-[#8f37eb]' />
+          <Sparkles className=' w-6 text-[#8e37eb]' />
           <h1 className=' text-xl font-semibold'>AI Title Generator</h1>
         </div>
 
@@ -39,6 +39,7 @@ const BlogTitles = () => {
           onClick={(e) => setInput(e.target.value)}
           placeholder='The future of AI is...'
           required
+          value={input}
         />
 
         <p className=' mt-4 text-sm font-medium'>Category</p>

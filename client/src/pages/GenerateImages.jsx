@@ -1,11 +1,20 @@
 import React, { useState } from "react";
-import { Hash, Sparkles } from "lucide-react";
+import { Hash, Image, Sparkles } from "lucide-react";
 
 const GenerateImages = () => {
-  const blogCategories = ["Realistic", "Ghibli"];
+  const imageStyles = [
+    "Realistic",
+    "Ghibli",
+    "Anime",
+    "Cartoon",
+    "Fantasy",
+    "3D",
+    "Portrait",
+  ];
 
-  const [selectedCategory, setSelectedCategory] = useState(blogCategories[0]);
+  const [selectedStyle, setSelectedStyle] = useState(imageStyles[0]);
   const [input, setInput] = useState("");
+  const [publish, setPublish] = useState(false);
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -18,30 +27,31 @@ const GenerateImages = () => {
         className=' w-full max-w-lg p-4 bg-white rounded-lg border border-gray-200'>
         {/* Heading */}
         <div className=' flex items-center gap-3'>
-          <Sparkles className=' w-6 text-[#8f37eb]' />
-          <h1 className=' text-xl font-semibold'>AI Title Generator</h1>
+          <Sparkles className=' w-6 text-[#00ad25]' />
+          <h1 className=' text-xl font-semibold'>AI Image Generator</h1>
         </div>
 
         {/* Input */}
         <p className=' mt-6 text-sm font-medium'>Describe your Image</p>
-        <input
-          type='text'
-          className=' w-full p-2 px-3 mt-2 outline-none text-sm rounded-md border border-gray-300'
+        <textarea
+          className='w-full h-32 px-4 mt-2 outline-none text-base rounded-md border border-gray-300'
           onClick={(e) => setInput(e.target.value)}
-          placeholder='The future of AI is...'
+          placeholder='Describe what you want to see in the image'
           required
+          value={input}
+          rows={4}
         />
 
-        <p className=' mt-4 text-sm font-medium'>Category</p>
+        <p className=' mt-4 text-sm font-medium'>Style</p>
 
         {/* Length Choice */}
         <div className=' mt-3 flex gap-3 flex-wrap sm:max-w-9/11'>
-          {blogCategories.map((item) => (
+          {imageStyles.map((item) => (
             <span
-              onClick={() => setSelectedCategory(item)}
+              onClick={() => setSelectedStyle(item)}
               key={item}
               className={`text-xs px-4 py-1 border rounded-full cursor-pointer ${
-                selectedCategory === item
+                selectedStyle === item
                   ? " bg-purple-50 text-purple-700"
                   : " text-gray-500 border-gray-300"
               }`}>
@@ -53,22 +63,22 @@ const GenerateImages = () => {
         <br />
 
         {/* Button */}
-        <button className=' w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#c34af6] to-[#8e37eb] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer'>
-          <Hash className=' w-5' />
-          Generate Title
+        <button className=' w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#00ad25] to-[#04ff50] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer'>
+          <Image className=' w-5' />
+          Generate Image
         </button>
       </form>
 
       {/* right col */}
       <div className=' w-full max-w-lg p-4 bg-white rounded-lg flex flex-col border border-gray-200 min-h-96 max-h-[600px]'>
         <div className=' flex items-center gap-3'>
-          <Hash className=' w-5 h-5 text-[#8e37eb]' />
-          <h1 className=' text-xl font-semibold'>Generated Titles</h1>
+          <Image className=' w-5 h-5 text-[#00ad25]' />
+          <h1 className=' text-xl font-semibold'>Generated Image</h1>
         </div>
         <div className=' flex flex-1 justify-center items-center'>
           <div className=' text-sm flex flex-col items-center gap-5 text-gray-400'>
             <Hash className=' w-9 h-9 ' />
-            <p>Enter a topic and click "Generate Title" to get started</p>
+            <p>Enter a topic and click "Generate Image" to get started</p>
           </div>
         </div>
       </div>
