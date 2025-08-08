@@ -3,7 +3,6 @@ import ReactMarkdown from "react-markdown";
 
 const CreationItem = ({ item }) => {
   const [expanded, setExpanded] = useState(false);
-  const data = "**Data Preprocessing:**";
 
   return (
     <div
