@@ -3,6 +3,8 @@ import sql from "../config/db.js";
 import { clerkClient } from "@clerk/express";
 import axios from "axios";
 import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
+import pdf from "pdf-parse/lib/pdf-parse.js";
 
 const Ai = new OpenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -34,8 +36,10 @@ export const generateArticle = async (req, res) => {
       temperature: 0.7,
       max_tokens: length,
     });
+
     const content = response.choices[0].message.content;
-    await sql`INSERT INTO creations(user_id, prompt, content, type) VALUES (${userId}, ${prompt}, ${content}, 'article')`;
+
+    await sql `INSERT INTO creations(user_id, prompt, content, type) VALUES (${userId}, ${prompt}, ${content}, 'article')`;
 
     if (plan !== "premium") {
       await clerkClient.users.updateUser(userId, {
@@ -131,6 +135,118 @@ export const generateImage = async (req, res) => {
     })`;
 
     res.json({ success: true, content: secure_url });
+  } catch (error) {
+    console.log(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const removeImageBackground = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const { image } = req.file;
+    const prompt = "Remove image background";
+    const plan = req.plan;
+
+    if (plan !== "premium") {
+      return res.json({
+        success: false,
+        message: "This feature is only available to premium subscribers",
+      });
+    }
+
+    const { secure_url } = await cloudinary.uploader.upload(image.path, {
+      transformation: [
+        {
+          effect: "background_removal",
+        },
+      ],
+    });
+
+    await sql`INSERT INTO creations(user_id, prompt, content, type) VALUES (${userId}, ${prompt}, ${secure_url}, 'image')`;
+
+    res.json({ success: true, content: secure_url });
+  } catch (error) {
+    console.log(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const removeImageObject = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const { image } = req.file;
+    const { object } = req.body;
+    const prompt = `Remove ${object} from image`;
+    const plan = req.plan;
+
+    if (plan !== "premium") {
+      return res.json({
+        success: false,
+        message: "This feature is only available to premium subscribers",
+      });
+    }
+
+    const { public_id } = await cloudinary.uploader.upload(image.path);
+
+    const imageUrl = cloudinary.url(public_id, {
+      transformation: [{ effect: `gen_removal:${object}` }],
+      resource_type: "image",
+    });
+
+    await sql`INSERT INTO creations(user_id, prompt, content, type, publish) VALUES (${userId}, ${prompt}, ${imageUrl}, 'image', ${
+      publish ?? false
+    })`;
+
+    res.json({ success: true, content: secure_url });
+  } catch (error) {
+    console.log(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const resumeReview = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const resume = req.file;
+    const plan = req.plan;
+
+    if (plan !== "premium") {
+      return res.json({
+        success: false,
+        message: "This feature is only available to premium subscribers",
+      });
+    }
+
+    if (resume.size > 5 * 1024 * 1024) {
+      return res.json({
+        success: false,
+        message: "Size is larger than 5MB. Upload a shorter resume",
+      });
+    }
+
+    const dataBuffer = fs.readFileSync(resume.path);
+    const pdf = await pdf(dataBuffer);
+
+    const prompt = `Review the following resume and provide constructive feedback on its strength and its weaknesses, and areas of improvement. Resume content:\n\n${pdf.text}`;
+
+    const response = await Ai.chat.completions.create({
+      model: "gemini-2.0-flash",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 1000,
+    });
+
+    const content = response.choices[0].message.content;
+
+    await sql`INSERT INTO creations(user_id, prompt, content, type) VALUES (${userId}, ${prompt}, ${content}, 'resume-review')`;
+
+    res.json({ success: true, content });
   } catch (error) {
     console.log(error.message);
     res.json({ success: false, message: error.message });
