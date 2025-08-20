@@ -18,6 +18,12 @@ export const generateArticle = async (req, res) => {
     const plan = req.plan;
     const free_usage = req.free_usage || 0;
 
+    console.log(userId);
+    console.log(prompt);
+    console.log(length);
+    console.log(plan);
+    console.log(free_usage);
+
     if (plan !== "premium" && free_usage >= 10) {
       return res.json({
         success: false,
@@ -39,7 +45,7 @@ export const generateArticle = async (req, res) => {
 
     const content = response.choices[0].message.content;
 
-    await sql `INSERT INTO creations(user_id, prompt, content, type) VALUES (${userId}, ${prompt}, ${content}, 'article')`;
+    await sql`INSERT INTO creations(user_id, prompt, content, type) VALUES (${userId}, ${prompt}, ${content}, 'article')`;
 
     if (plan !== "premium") {
       await clerkClient.users.updateUser(userId, {
