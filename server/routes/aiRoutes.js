@@ -18,6 +18,7 @@ aiRouter.post("/generate-blog-title", auth, generateBlogTitle);
 
 aiRouter.post("/generate-image", auth, generateImage);
 
+// Remove image background
 aiRouter.post(
   "/remove-image-background",
   upload.single("image"),
@@ -25,6 +26,7 @@ aiRouter.post(
   removeImageBackground
 );
 
+// Remove image object
 aiRouter.post(
   "/remove-image-object",
   upload.single("image"),
