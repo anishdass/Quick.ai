@@ -1,11 +1,43 @@
 import React, { useState } from "react";
 import { Scissors, Sparkles } from "lucide-react";
+import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const RemoveObject = () => {
+  const { loading, setLoading, axios, getToken } = useAppContext();
+  const [file, setFile] = useState(null);
+  const [fileName, setFileName] = useState("");
   const [input, setInput] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+
+  const formData = new FormData();
+  formData.append("image", file);
+  formData.append("object", input);
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+    try {
+      setLoading(true);
+
+      const { data } = await axios.post(
+        "/api/ai/remove-image-object",
+        formData,
+        { input },
+        {
+          headers: { Authorization: `Bearer ${await getToken()}` },
+        }
+      );
+
+      if (data.success) {
+        setImageUrl(data.content);
+      } else {
+        toast.error(data.message);
+      }
+
+      setLoading(false);
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -28,21 +60,27 @@ const RemoveObject = () => {
             className='px-4 py-2 bg-indigo-400 text-white text-sm font-medium rounded-md cursor-pointer hover:bg-indigo-600 transition duration-200'>
             Choose File
           </label>
+
           <span id='file-name' className='text-sm text-gray-600'>
-            No file chosen
+            {fileName ? fileName : "No files attached"}
           </span>
+
           <input
             id='file-upload'
             type='file'
             className='hidden'
             accept='image/*'
             onChange={(e) => {
-              const fileName = e.target.files[0]?.name || "No file chosen";
-              document.getElementById("file-name").textContent = fileName;
+              setFile(e.target.files[0]);
+              setFileName(e.target.files[0]?.name);
             }}
             required
           />
         </div>
+
+        <p className=' text-xs text-gray-500 font-light mt-1'>
+          Supports JPG, PNG, and other image formats
+        </p>
 
         <p className=' mt-6 text-sm font-medium'>Describe Object to remove</p>
         <textarea
@@ -59,7 +97,11 @@ const RemoveObject = () => {
 
         {/* Button */}
         <button className=' w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#417df6] to-[#8e37eb] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer'>
-          <Scissors className=' w-5' />
+          {!loading ? (
+            <Scissors className=' w-5' />
+          ) : (
+            <div className=' w-4 h-4 my-1 rounded-full border-2 border-t-transparent animate-spin'></div>
+          )}
           Remove Object
         </button>
       </form>
@@ -70,12 +112,22 @@ const RemoveObject = () => {
           <Scissors className=' w-5 h-5 text-[#4a7aff]' />
           <h1 className=' text-xl font-semibold'>Processed Image</h1>
         </div>
-        <div className=' flex flex-1 justify-center items-center'>
-          <div className=' text-sm flex flex-col items-center gap-5 text-gray-400'>
-            <Scissors className=' w-9 h-9 ' />
-            <p>Enter a topic and click "Remove Object" to get started</p>
+        {!imageUrl ? (
+          <div className=' flex flex-1 justify-center items-center'>
+            <div className=' text-sm flex flex-col items-center gap-5 text-gray-400'>
+              <Scissors className=' w-9 h-9 ' />
+              <p>Enter a topic and click "Remove Object" to get started</p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div>
+            <img
+              src={imageUrl}
+              alt='Generated Image'
+              className=' w-full h-full'
+            />
+          </div>
+        )}
       </div>
     </div>
   );

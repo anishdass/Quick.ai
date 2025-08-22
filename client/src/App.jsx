@@ -14,15 +14,15 @@ import { Toaster } from "react-hot-toast";
 import { useAppContext } from "./context/AppContext";
 
 const App = () => {
-  // Get token to test cases, Delete at final commit
-  const { getToken } = useAppContext();
-  useEffect(() => {
-    const fetchToken = async () => {
-      const token = await getToken();
-      console.log(token);
-    };
-    fetchToken();
-  }, []);
+  // // Get token to test cases, Delete at final commit
+  // const { getToken } = useAppContext();
+  // useEffect(() => {
+  //   const fetchToken = async () => {
+  //     const token = await getToken();
+  //     console.log(token);
+  //   };
+  //   fetchToken();
+  // }, []);
 
   return (
     <div>

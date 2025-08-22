@@ -181,8 +181,9 @@ export const removeImageBackground = async (req, res) => {
 export const removeImageObject = async (req, res) => {
   try {
     const { userId } = req.auth();
-    const { image } = req.file;
+    const image = req.file;
     const { object } = req.body;
+
     const prompt = `Remove ${object} from image`;
     const plan = req.plan;
 
@@ -196,15 +197,13 @@ export const removeImageObject = async (req, res) => {
     const { public_id } = await cloudinary.uploader.upload(image.path);
 
     const imageUrl = cloudinary.url(public_id, {
-      transformation: [{ effect: `gen_removal:${object}` }],
+      transformation: [{ effect: `gen_remove:${object}` }],
       resource_type: "image",
     });
 
-    await sql`INSERT INTO creations(user_id, prompt, content, type, publish) VALUES (${userId}, ${prompt}, ${imageUrl}, 'image', ${
-      publish ?? false
-    })`;
+    await sql`INSERT INTO creations(user_id, prompt, content, type) VALUES (${userId}, ${prompt}, ${imageUrl}, 'image')`;
 
-    res.json({ success: true, content: secure_url });
+    res.json({ success: true, content: imageUrl });
   } catch (error) {
     console.log(error.message);
     res.json({ success: false, message: error.message });
