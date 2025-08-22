@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { Edit, Sparkles } from "lucide-react";
-import axios from "axios";
-import { useAuth } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
 import Markdown from "react-markdown";
-
-axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
+import { useAppContext } from "../context/AppContext";
 
 const WriteArticle = () => {
+  const { loading, setLoading, axios, getToken } = useAppContext();
+
   const articleLength = [
     { length: 800, text: "Short (500-800 words)" },
     { length: 1200, text: "Medium (800-1200 words)" },
@@ -16,16 +15,15 @@ const WriteArticle = () => {
 
   const [selectedLength, setSelectedLength] = useState(articleLength[0]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
   const [content, setContent] = useState("");
-
-  const { getToken } = useAuth();
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
+      
       const prompt = `Write an article about ${input} in ${selectedLength.text}`;
+      
       const { data } = await axios.post(
         "/api/ai/generate-article",
         {
@@ -39,17 +37,15 @@ const WriteArticle = () => {
         }
       );
 
-      console.log(data);
-
       if (data.success) {
         setContent(data.content);
       } else {
         toast.error(data.message);
       }
+      setLoading(false);
     } catch (error) {
       toast.error(error.message);
     }
-    setLoading(false);
   };
 
   return (

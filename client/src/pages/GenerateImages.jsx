@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Image, Sparkles } from "lucide-react";
+import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const GenerateImages = () => {
+  const { loading, setLoading, axios, getToken } = useAppContext();
   const imageStyles = [
     "Realistic",
     "Ghibli",
@@ -15,9 +18,31 @@ const GenerateImages = () => {
   const [selectedStyle, setSelectedStyle] = useState(imageStyles[0]);
   const [input, setInput] = useState("");
   const [publish, setPublish] = useState(true);
+  const [imageUrl, setImageUrl] = useState("");
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+    try {
+      setLoading(true);
+
+      const prompt = `Create a ${selectedStyle} image of ${input}`;
+
+      const { data } = await axios.post(
+        "/api/ai/generate-image",
+        { prompt },
+        { headers: { Authorization: `Bearer ${await getToken()}` } }
+      );
+
+      if (data.success) {
+        setImageUrl(data.content);
+      } else {
+        toast.error(data.message);
+      }
+
+      setLoading(false);
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
   return (
     <div className=' h-full overflow-y-scroll p-6 flex items-start flex-wrap gap-4 text-slate-700'>
@@ -35,7 +60,7 @@ const GenerateImages = () => {
         <p className=' mt-6 text-sm font-medium'>Describe your Image</p>
         <textarea
           className='w-full h-32 px-4 mt-2 outline-none text-base rounded-md border border-gray-300'
-          onClick={(e) => setInput(e.target.value)}
+          onChange={(e) => setInput(e.target.value)}
           placeholder='Describe what you want to see in the image'
           required
           value={input}
@@ -76,8 +101,14 @@ const GenerateImages = () => {
         </div>
 
         {/* Button */}
-        <button className=' w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#00ad25] to-[#04ff50] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer'>
-          <Image className=' w-5' />
+        <button
+          disabled={loading}
+          className=' w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#00ad25] to-[#04ff50] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer'>
+          {!loading ? (
+            <Image className=' w-5' />
+          ) : (
+            <div className=' w-4 h-4 my-1 rounded-full border-2 border-t-transparent animate-spin'></div>
+          )}
           Generate Image
         </button>
       </form>
@@ -88,12 +119,22 @@ const GenerateImages = () => {
           <Image className=' w-5 h-5 text-[#00ad25]' />
           <h1 className=' text-xl font-semibold'>Generated Image</h1>
         </div>
-        <div className=' flex flex-1 justify-center items-center'>
-          <div className=' text-sm flex flex-col items-center gap-5 text-gray-400'>
-            <Image className=' w-9 h-9 ' />
-            <p>Enter a topic and click "Generate Image" to get started</p>
+        {!imageUrl ? (
+          <div className=' flex flex-1 justify-center items-center'>
+            <div className=' text-sm flex flex-col items-center gap-5 text-gray-400'>
+              <Image className=' w-9 h-9 ' />
+              <p>Enter a topic and click "Generate Image" to get started</p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div>
+            <img
+              src={imageUrl}
+              alt='Generated Image'
+              className=' w-full h-full'
+            />
+          </div>
+        )}
       </div>
     </div>
   );

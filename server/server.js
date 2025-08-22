@@ -7,12 +7,13 @@ import connectCloudinary from "./config/cloudinary.js";
 import userRouter from "./routes/userRoutes.js";
 
 const app = express();
+const allowedOrigins = ["http://localhost:5173"];
 
 await connectCloudinary();
 
-app.use(cors());
 app.use(express.json());
 app.use(clerkMiddleware());
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 app.get("/", (req, res) => res.send("Server is Live"));
 
