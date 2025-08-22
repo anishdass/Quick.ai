@@ -16,6 +16,11 @@ const RemoveObject = () => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+
+    if (input.split(" ").length > 1) {
+      return toast.error("Enter only one object to remove");
+    }
+
     try {
       setLoading(true);
 
