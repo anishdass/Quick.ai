@@ -11,6 +11,70 @@ const Ai = new OpenAI({
   baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
 });
 
+export const resumeReview = async (req, res) => {
+  try {
+    const { userId } = req.auth();
+    const resume = req.file;
+    const plan = req.plan;
+
+    if (!resume) {
+      return res.json({
+        success: false,
+        message: "No resume uploaded",
+      });
+    }
+
+    if (plan !== "premium") {
+      return res.json({
+        success: false,
+        message: "This feature is only available to premium subscribers",
+      });
+    }
+
+    if (resume.size > 5 * 1024 * 1024) {
+      return res.json({
+        success: false,
+        message: "Size is larger than 5MB. Upload a shorter resume",
+      });
+    }
+
+    // Parse the uploaded PDF
+    const dataBuffer = fs.readFileSync(resume.path);
+    const pdfData = await pdf(dataBuffer);
+
+    const prompt = `Review the following resume and provide constructive feedback on its strengths, weaknesses, and areas for improvement:\n\n${pdfData.text}`;
+
+    // Call Gemini via OpenAI client
+    const response = await Ai.chat.completions.create({
+      model: "gemini-2.0-flash",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 1000,
+    });
+
+    console.log(response);
+
+    // Extract response content correctly
+    const content =
+      response.choices[0].message?.content?.[0]?.text ||
+      response.choices[0].message?.content ||
+      "";
+
+    // Save to DB
+    await sql`INSERT INTO creations(user_id, prompt, content, type) VALUES (${userId}, ${prompt}, ${content}, 'resume-review')`;
+
+    res.json({ success: true, content });
+  } catch (error) {
+    console.error(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
+
 export const generateArticle = async (req, res) => {
   try {
     const { userId } = req.auth();
@@ -204,54 +268,6 @@ export const removeImageObject = async (req, res) => {
     await sql`INSERT INTO creations(user_id, prompt, content, type) VALUES (${userId}, ${prompt}, ${imageUrl}, 'image')`;
 
     res.json({ success: true, content: imageUrl });
-  } catch (error) {
-    console.log(error.message);
-    res.json({ success: false, message: error.message });
-  }
-};
-
-export const resumeReview = async (req, res) => {
-  try {
-    const { userId } = req.auth();
-    const resume = req.file;
-    const plan = req.plan;
-
-    if (plan !== "premium") {
-      return res.json({
-        success: false,
-        message: "This feature is only available to premium subscribers",
-      });
-    }
-
-    if (resume.size > 5 * 1024 * 1024) {
-      return res.json({
-        success: false,
-        message: "Size is larger than 5MB. Upload a shorter resume",
-      });
-    }
-
-    const dataBuffer = fs.readFileSync(resume.path);
-    const pdf = await pdf(dataBuffer);
-
-    const prompt = `Review the following resume and provide constructive feedback on its strength and its weaknesses, and areas of improvement. Resume content:\n\n${pdf.text}`;
-
-    const response = await Ai.chat.completions.create({
-      model: "gemini-2.0-flash",
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 1000,
-    });
-
-    const content = response.choices[0].message.content;
-
-    await sql`INSERT INTO creations(user_id, prompt, content, type) VALUES (${userId}, ${prompt}, ${content}, 'resume-review')`;
-
-    res.json({ success: true, content });
   } catch (error) {
     console.log(error.message);
     res.json({ success: false, message: error.message });
