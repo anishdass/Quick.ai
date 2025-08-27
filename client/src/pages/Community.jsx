@@ -1,14 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { useUser } from "@clerk/clerk-react";
-import { dummyPublishedCreationData } from "../assets/assets";
 import { Heart } from "lucide-react";
+import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const Community = () => {
+  const { loading, setLoading, axios, token } = useAppContext();
   const [creations, setCreations] = useState();
   const { user } = useUser();
 
-  const fetchCreations = () => {
-    setCreations(dummyPublishedCreationData);
+  const fetchCreations = async () => {
+    try {
+      setLoading(true);
+
+      const { data } = await axios.get("api/user/get-published-creations", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (data.success) {
+        setCreations(data.content);
+      } else {
+        toast.error(data.message);
+      }
+
+      setLoading(false);
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
@@ -16,6 +34,24 @@ const Community = () => {
       fetchCreations();
     }
   }, [user]);
+
+  const toggleLikeClick = async (id) => {
+    try {
+      const { data } = await axios.post(
+        "/api/user/toggle-likes",
+        { id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (data.success) {
+        fetchCreations();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   return (
     creations && (
@@ -38,6 +74,7 @@ const Community = () => {
                 <div className=' flex gap-1 items-center'>
                   <p>{creation.likes.length}</p>
                   <Heart
+                    onClick={() => toggleLikeClick(creation.id)}
                     className={` min-w-5 h-5 hover:scale-110 cursor-pointer ${
                       creation.likes.includes(user.id)
                         ? " fill-red-500 text-red-600"

@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import Markdown from "react-markdown";
 
 const BlogTitles = () => {
-  const { loading, setLoading, axios, getToken } = useAppContext();
+  const { loading, setLoading, axios, token } = useAppContext();
   const blogCategories = [
     "General",
     "Technology",
@@ -35,7 +35,7 @@ const BlogTitles = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${await getToken()}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );

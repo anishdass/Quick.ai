@@ -4,7 +4,7 @@ import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
 
 const GenerateImages = () => {
-  const { loading, setLoading, axios, getToken } = useAppContext();
+  const { loading, setLoading, axios, token } = useAppContext();
   const imageStyles = [
     "Realistic",
     "Ghibli",
@@ -29,8 +29,8 @@ const GenerateImages = () => {
 
       const { data } = await axios.post(
         "/api/ai/generate-image",
-        { prompt },
-        { headers: { Authorization: `Bearer ${await getToken()}` } }
+        { prompt, publish },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (data.success) {

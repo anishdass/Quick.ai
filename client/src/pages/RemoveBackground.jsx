@@ -4,7 +4,7 @@ import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
 
 const RemoveBackground = () => {
-  const { loading, setLoading, axios, getToken } = useAppContext();
+  const { loading, setLoading, axios, token } = useAppContext();
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -21,7 +21,7 @@ const RemoveBackground = () => {
         "/api/ai/remove-image-background",
         formData,
         {
-          headers: { Authorization: `Bearer ${await getToken()}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 

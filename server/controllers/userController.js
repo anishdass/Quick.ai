@@ -43,7 +43,8 @@ export const toggleLikes = async (req, res) => {
       });
     }
 
-    const currentLikes = creations.likes;
+    const currentLikes = creations[0].likes;
+
     const usrIdStr = userId.toString();
     let updateLikes;
     let message;
@@ -56,11 +57,11 @@ export const toggleLikes = async (req, res) => {
       message = "Creation Liked";
     }
 
-    const formattedArray = `{${updateLikes.json(",")}}`;
+    const formattedArray = `{${updateLikes.join(",")}}`;
 
     await sql`UPDATE creations SET likes=${formattedArray}::text[] WHERE id=${id}`;
 
-    res.json({ success: true, creations });
+    res.json({ success: true, message });
   } catch (error) {
     console.log(error.message);
     res.json({ success: false, message: error.message });

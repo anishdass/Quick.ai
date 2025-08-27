@@ -4,7 +4,7 @@ import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
 
 const RemoveObject = () => {
-  const { loading, setLoading, axios, getToken } = useAppContext();
+  const { loading, setLoading, axios, token } = useAppContext();
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState("");
   const [input, setInput] = useState("");
@@ -29,7 +29,7 @@ const RemoveObject = () => {
         formData,
         { input },
         {
-          headers: { Authorization: `Bearer ${await getToken()}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 

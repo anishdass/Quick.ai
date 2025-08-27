@@ -5,7 +5,7 @@ import Markdown from "react-markdown";
 import { useAppContext } from "../context/AppContext";
 
 const WriteArticle = () => {
-  const { loading, setLoading, axios, getToken } = useAppContext();
+  const { loading, setLoading, axios, token } = useAppContext();
 
   const articleLength = [
     { length: 800, text: "Short (500-800 words)" },
@@ -21,9 +21,9 @@ const WriteArticle = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      
+
       const prompt = `Write an article about ${input} in ${selectedLength.text}`;
-      
+
       const { data } = await axios.post(
         "/api/ai/generate-article",
         {
@@ -32,7 +32,7 @@ const WriteArticle = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${await getToken()}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );

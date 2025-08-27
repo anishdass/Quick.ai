@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
 
 const ReviewResume = () => {
-  const { loading, setLoading, axios, getToken } = useAppContext();
+  const { loading, setLoading, axios, token } = useAppContext();
 
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState("");
@@ -20,7 +20,7 @@ const ReviewResume = () => {
       formData.append("resume", file);
 
       const { data } = await axios.post("/api/ai/resume-review", formData, {
-        headers: { Authorization: `Bearer ${await getToken()}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (data.success) {
