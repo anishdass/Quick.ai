@@ -7,7 +7,10 @@ import connectCloudinary from "./config/cloudinary.js";
 import userRouter from "./routes/userRoutes.js";
 
 const app = express();
-const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://quick-ai-alpha-one.vercel.app/",
+];
 
 await connectCloudinary();
 
